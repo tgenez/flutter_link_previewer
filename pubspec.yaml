@@ -6,6 +6,8 @@ version: 2.6.1
 homepage: https://flyer.chat
 repository: https://github.com/flyerhq/flutter_link_previewer
 
+publish_to: "none"
+
 environment:
   sdk: ">=2.14.0 <3.0.0"
   flutter: ">=2.0.0"
