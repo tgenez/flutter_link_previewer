@@ -67,8 +67,14 @@ class _MyHomePageState extends State<MyHomePage> {
                     };
                   });
                 },
+                header: 'John',
+                headerStyle: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  height: 1.333,
+                ),
                 previewData: datas[urls[index]],
-                text: urls[index],
+                text: 'test no clickable  ' + urls[index],
                 width: MediaQuery.of(context).size.width,
               ),
             ),

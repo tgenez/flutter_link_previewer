@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' show PreviewData;
 import 'package:flutter_linkify/flutter_linkify.dart' hide UrlLinkifier;
+import 'package:linkify/linkify.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../url_linkifier.dart' show UrlLinkifier;
+
 import '../utils.dart' show getPreviewData;
 
 /// A widget that renders text with highlighted links.
@@ -253,17 +254,8 @@ class _LinkPreviewState extends State<LinkPreview>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (widget.header != null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
-                    child: Text(
-                      widget.header!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: widget.headerStyle,
-                    ),
-                  ),
-                _linkify(),
+                _linkify(
+                    authorText: widget.header, authorStyle: widget.headerStyle),
                 if (withPadding && child != null)
                   shouldAnimate ? _animated(child) : child,
               ],
@@ -303,23 +295,42 @@ class _LinkPreviewState extends State<LinkPreview>
     );
   }
 
-  Widget _linkify() {
-    return SelectableLinkify(
-      linkifiers: [const EmailLinkifier(), UrlLinkifier()],
-      linkStyle: widget.linkStyle,
-      maxLines: 100,
-      minLines: 1,
-      onOpen: widget.onLinkPressed != null
-          ? (element) => widget.onLinkPressed!(element.url)
-          : _onOpen,
+  Widget _linkify({
+    String? authorText,
+    TextStyle? authorStyle,
+  }) {
+    final style = widget.textStyle;
+    final linkStyle = widget.linkStyle;
+    final elements = linkify(
+      widget.text,
       options: const LinkifyOptions(
         defaultToHttps: true,
         humanize: false,
         looseUrl: true,
       ),
-      text: widget.text,
-      style: widget.textStyle,
+      linkifiers: [const EmailLinkifier(), UrlLinkifier()],
     );
+
+    return SelectableText.rich(TextSpan(children: [
+      TextSpan(
+          text: authorText != null ? authorText + ' ' : '', style: authorStyle),
+      buildTextSpan(
+        elements,
+        style: Theme.of(context).textTheme.bodyText2?.merge(style),
+        onOpen: widget.onLinkPressed != null
+            ? (element) => widget.onLinkPressed!(element.url)
+            : _onOpen,
+        linkStyle: Theme.of(context)
+            .textTheme
+            .bodyText2
+            ?.merge(style)
+            .copyWith(
+              color: Colors.blueAccent,
+              decoration: TextDecoration.underline,
+            )
+            .merge(linkStyle),
+      ),
+    ]));
   }
 
   Widget _minimizedBodyWidget(PreviewData data, String text) {
